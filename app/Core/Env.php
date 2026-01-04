@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Core;
+
+class Env
+{
+    protected static $vars = [];
+
+    public static function load(string $path): void
+    {
+        if (!file_exists($path)) {
+            return;
+        }
+
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (str_starts_with(trim($line), '#')) {
+                continue;
+            }
+
+            $parts = explode('=', $line, 2);
+            if (count($parts) !== 2) {
+                continue;
+            }
+
+            $key = trim($parts[0]);
+            $value = trim($parts[1]);
+
+            // Remove quotes if present
+            if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
+                $value = substr($value, 1, -1);
+            } elseif (str_starts_with($value, "'") && str_ends_with($value, "'")) {
+                $value = substr($value, 1, -1);
+            }
+
+            static::$vars[$key] = $value;
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+
+    public static function get(string $key, $default = null)
+    {
+        return static::$vars[$key] ?? $_ENV[$key] ?? $default;
+    }
+}
