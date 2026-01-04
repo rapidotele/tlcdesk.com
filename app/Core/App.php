@@ -26,6 +26,9 @@ class App
 
     protected static function registerRoutes(Router $router)
     {
+        // Lang Switcher
+        $router->get('/lang/{locale}', [\App\Controllers\LangController::class, 'switch']);
+
         // Install Route
         $router->any('/install', [\App\Controllers\Install\InstallController::class, 'index']);
         $router->post('/install/run', [\App\Controllers\Install\InstallController::class, 'install']);
@@ -38,13 +41,13 @@ class App
         $router->any('/logout', [\App\Controllers\Auth\AuthController::class, 'logout']);
 
         // Driver Routes
-        $router->group(['prefix' => '/driver', 'middleware' => [\App\Middleware\AuthMiddleware::class]], function($r) {
+        $router->group(['prefix' => '/driver', 'middleware' => [\App\Middleware\TenantMiddleware::class, \App\Middleware\DriverMiddleware::class]], function($r) {
             $r->get('/dashboard', [\App\Controllers\Driver\DashboardController::class, 'index']);
             $r->post('/bookkeeping/add', [\App\Controllers\Driver\BookkeepingController::class, 'add']);
         });
 
         // Owner Routes
-        $router->group(['prefix' => '/owner', 'middleware' => [\App\Middleware\AuthMiddleware::class]], function($r) {
+        $router->group(['prefix' => '/owner', 'middleware' => [\App\Middleware\TenantMiddleware::class, \App\Middleware\OwnerMiddleware::class]], function($r) {
             $r->get('/dashboard', [\App\Controllers\Owner\DashboardController::class, 'index']);
 
             // Vehicles
@@ -59,8 +62,29 @@ class App
         });
 
         // Admin Routes
-        $router->group(['prefix' => '/admin', 'middleware' => [\App\Middleware\AuthMiddleware::class]], function($r) {
+        $router->group(['prefix' => '/admin', 'middleware' => [\App\Middleware\TenantMiddleware::class, \App\Middleware\AdminMiddleware::class]], function($r) {
             $r->get('/dashboard', [\App\Controllers\Admin\DashboardController::class, 'index']);
+
+            // Users
+            $r->get('/users', [\App\Controllers\Admin\UserController::class, 'index']);
+            $r->get('/users/create', [\App\Controllers\Admin\UserController::class, 'create']);
+            $r->post('/users/store', [\App\Controllers\Admin\UserController::class, 'store']);
+            $r->get('/users/edit/{id}', [\App\Controllers\Admin\UserController::class, 'edit']);
+            $r->post('/users/update/{id}', [\App\Controllers\Admin\UserController::class, 'update']);
+
+            // Vehicles (Global Admin View)
+            $r->get('/vehicles', [\App\Controllers\Admin\VehicleController::class, 'index']);
+            $r->get('/vehicles/create', [\App\Controllers\Admin\VehicleController::class, 'create']);
+            $r->post('/vehicles/store', [\App\Controllers\Admin\VehicleController::class, 'store']);
+            $r->get('/vehicles/edit/{id}', [\App\Controllers\Admin\VehicleController::class, 'edit']);
+            $r->post('/vehicles/update/{id}', [\App\Controllers\Admin\VehicleController::class, 'update']);
+            $r->get('/vehicles/delete/{id}', [\App\Controllers\Admin\VehicleController::class, 'delete']);
+
+            // Assignments
+            $r->get('/assignments', [\App\Controllers\Admin\AssignmentController::class, 'index']);
+            $r->get('/assignments/create', [\App\Controllers\Admin\AssignmentController::class, 'create']);
+            $r->post('/assignments/store', [\App\Controllers\Admin\AssignmentController::class, 'store']);
+            $r->get('/assignments/end/{id}', [\App\Controllers\Admin\AssignmentController::class, 'end']);
         });
 
         // Maps
