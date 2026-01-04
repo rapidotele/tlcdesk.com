@@ -15,13 +15,13 @@
         <div class="flex flex-col flex-1 overflow-y-auto">
              <nav class="flex-1 px-2 py-4 space-y-2">
                 <a href="/owner/dashboard" class="flex items-center px-4 py-2 text-gray-100 bg-indigo-700 rounded-md">
-                    Dashboard
+                    <?= t('dashboard') ?>
                 </a>
                 <a href="/owner/drivers" class="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-700 rounded-md">
-                    Drivers
+                    <?= t('drivers') ?>
                 </a>
                 <a href="/owner/vehicles" class="flex items-center px-4 py-2 text-indigo-200 hover:bg-indigo-700 rounded-md">
-                    Vehicles
+                    <?= t('vehicles') ?>
                 </a>
              </nav>
         </div>
@@ -31,8 +31,12 @@
          <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
             <div></div>
             <div class="flex items-center">
-                <span class="text-gray-800 text-sm mr-4"><?= e($user_name) ?> (Owner)</span>
-                <a href="/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
+                 <div class="mr-6 text-sm">
+                    <a href="/lang/en" class="mx-1 <?= \App\Core\Session::get('locale') == 'en' ? 'font-bold' : '' ?>">EN</a>
+                    <a href="/lang/es" class="mx-1 <?= \App\Core\Session::get('locale') == 'es' ? 'font-bold' : '' ?>">ES</a>
+                </div>
+                <span class="text-gray-800 text-sm mr-4"><?= e(t('welcome', ['name' => $user_name])) ?></span>
+                <a href="/logout" class="text-sm text-red-600 hover:text-red-800"><?= t('logout') ?></a>
             </div>
         </header>
         <main class="flex-1 p-6">

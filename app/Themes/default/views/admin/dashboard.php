@@ -14,14 +14,17 @@
         </div>
         <div class="flex flex-col flex-1 overflow-y-auto">
              <nav class="flex-1 px-2 py-4 space-y-2">
-                <a href="#" class="flex items-center px-4 py-2 text-gray-100 bg-gray-800 rounded-md">
-                    Dashboard
+                <a href="/admin/dashboard" class="flex items-center px-4 py-2 text-gray-100 bg-gray-800 rounded-md">
+                    <?= t('dashboard') ?>
                 </a>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-800 rounded-md">
-                    Tenants
+                <a href="/admin/users" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-800 rounded-md">
+                    <?= t('users') ?>
                 </a>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-800 rounded-md">
-                    Themes
+                <a href="/admin/vehicles" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-800 rounded-md">
+                    <?= t('vehicles') ?>
+                </a>
+                <a href="/admin/assignments" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-800 rounded-md">
+                    <?= t('assignments') ?>
                 </a>
              </nav>
         </div>
@@ -31,8 +34,12 @@
          <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
             <div></div>
             <div class="flex items-center">
-                <span class="text-gray-800 text-sm mr-4"><?= e($user_name) ?> (SuperAdmin)</span>
-                <a href="/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
+                 <div class="mr-6 text-sm">
+                    <a href="/lang/en" class="mx-1 <?= \App\Core\Session::get('locale') == 'en' ? 'font-bold' : '' ?>">EN</a>
+                    <a href="/lang/es" class="mx-1 <?= \App\Core\Session::get('locale') == 'es' ? 'font-bold' : '' ?>">ES</a>
+                </div>
+                <span class="text-gray-800 text-sm mr-4"><?= e(t('welcome', ['name' => $user_name])) ?></span>
+                <a href="/logout" class="text-sm text-red-600 hover:text-red-800"><?= t('logout') ?></a>
             </div>
         </header>
         <main class="flex-1 p-6">
