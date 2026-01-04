@@ -85,6 +85,10 @@ class App
             $r->get('/assignments/create', [\App\Controllers\Admin\AssignmentController::class, 'create']);
             $r->post('/assignments/store', [\App\Controllers\Admin\AssignmentController::class, 'store']);
             $r->get('/assignments/end/{id}', [\App\Controllers\Admin\AssignmentController::class, 'end']);
+
+            // Settings
+            $r->get('/settings', [\App\Controllers\Admin\SettingController::class, 'index']);
+            $r->post('/settings/theme', [\App\Controllers\Admin\SettingController::class, 'updateTheme']);
         });
 
         // Maps
