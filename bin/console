@@ -1,0 +1,72 @@
+#!/usr/bin/env php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    exit;
+}
+
+require __DIR__ . '/../app/bootstrap.php';
+
+use App\Core\Database;
+
+$args = $argv;
+array_shift($args); // remove script name
+
+$command = $args[0] ?? null;
+
+if ($command === 'queue:work') {
+    echo "Starting Queue Worker (MySQL 5.7+ compatible)...\n";
+
+    $db = Database::getInstance();
+
+    while (true) {
+        // MySQL 5.7 Compatible Queue logic
+        // We cannot use SKIP LOCKED.
+        // Strategy:
+        // 1. UPDATE jobs SET locked_at = NOW(), status = 'running' WHERE status = 'pending' AND (run_at <= NOW() OR run_at IS NULL) LIMIT 1
+        // But to know WHICH one we locked, we need to be clever or use a two-step with IDs.
+        // Better:
+        // 1. SELECT id FROM jobs WHERE status='pending' ... LIMIT 1
+        // 2. UPDATE jobs SET status='running' WHERE id=? AND status='pending'
+        // If row count > 0, we got it. If 0, someone else stole it.
+
+        try {
+            // Find a candidate
+            $sql = "SELECT id, type, payload_json FROM jobs
+                    WHERE status = 'pending'
+                    AND (run_at IS NULL OR run_at <= NOW())
+                    ORDER BY created_at ASC LIMIT 1";
+
+            $stmt = $db->getConnection()->query($sql);
+            $candidate = $stmt->fetch();
+
+            if ($candidate) {
+                // Try to acquire lock atomically
+                $update = $db->getConnection()->prepare("UPDATE jobs SET status='running', locked_at=NOW() WHERE id=? AND status='pending'");
+                $update->execute([$candidate['id']]);
+
+                if ($update->rowCount() > 0) {
+                     // We acquired the lock
+                     echo "Processing job {$candidate['id']} ({$candidate['type']})...\n";
+
+                     // Process (Mock)
+                     // $payload = json_decode($candidate['payload_json'], true);
+                     sleep(1); // Mock work
+
+                     // Complete
+                     $db->getConnection()->prepare("UPDATE jobs SET status='completed' WHERE id=?")->execute([$candidate['id']]);
+                     echo "Job {$candidate['id']} completed.\n";
+                } else {
+                    // Race condition lost, just loop again
+                }
+            } else {
+                sleep(5); // No jobs
+            }
+        } catch (Exception $e) {
+            echo "Error: " . $e->getMessage() . "\n";
+            sleep(5);
+        }
+    }
+} else {
+    echo "Usage: bin/console queue:work\n";
+}
